@@ -32,7 +32,9 @@ python -m http.server 8765
 
 ## 部署到 GitHub Pages
 
-仓库：`xman0592/ctf-kpi`，线上地址 https://xman0592.github.io/ctf-kpi/
+仓库：`xman0592/ctf-kpi-v2`，线上地址 https://xman0592.github.io/ctf-kpi-v2/
+
+> 旧仓库 `xman0592/ctf-kpi` 的 Pages 已关闭，旧链接作废；新链接同源，手机本地数据会自动带过去。
 
 1. 改 `index.html`
 2. 改 `version.json` 里的 `version`
