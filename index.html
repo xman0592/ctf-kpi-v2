@@ -423,7 +423,7 @@ details[open].metric-set summary .chev{transform:rotate(180deg)}
   <div class="logo">周大福<br>KPI</div>
   <div class="brandwrap">
     <h1>店务 KPI</h1>
-    <p id="storeName">周大福 · 吕厝天虹店</p>
+    <p id="storeName">周大福 · 厦门K11 Select店</p>
   </div>
   <button class="topbtn" data-act="help" aria-label="使用帮助">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.8"/><path d="M12 17h.01"/></svg>
@@ -463,13 +463,15 @@ details[open].metric-set summary .chev{transform:rotate(180deg)}
 'use strict';
 
 /* ================= 常量 ================= */
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 const LS_KEY = 'ctf_kpi_state_v1';
 const SNAP_KEY = 'ctf_kpi_snaps_v1';
 const SNAP_TS_KEY = 'ctf_kpi_last_snap';
 const MAX_SNAPS = 5;
 const SNAP_INTERVAL = 30 * 60 * 1000;
 const DEFAULT_MONTHLY_TARGET = 30; // 人均月度任务（万）
+const DEFAULT_STORE_NAME = '周大福 · 厦门K11 Select店';
+const LEGACY_STORE_NAMES = ['周大福 · 吕厝天虹店']; // 妈妈 2026-10-30 调店，旧店名自动换成新店名
 
 const DEFAULT_STAFF = [
   { id:'s1', name:'叶燕红', active:true },
@@ -599,12 +601,17 @@ function fmt1(n){
 }
 function mean(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
 function clamp(n,min,max){ return Math.min(max,Math.max(min,n)); }
+function normalizeStoreName(name){
+  const n = String(name||'').trim();
+  if(!n) return DEFAULT_STORE_NAME;
+  return LEGACY_STORE_NAMES.includes(n) ? DEFAULT_STORE_NAME : n;
+}
 
 /* ================= 状态 ================= */
 function defaultState(){
   return {
     version: 2,
-    storeName: '周大福 · 吕厝天虹店',
+    storeName: DEFAULT_STORE_NAME,
     monthlyTarget: DEFAULT_MONTHLY_TARGET,
     staff: DEFAULT_STAFF.map(x=>({...x})),
     metrics: DEFAULT_METRICS.map(x=>({...x})),
@@ -663,7 +670,7 @@ function migrateState(raw){
   const out = defaultState();
   if(!raw || typeof raw !== 'object') return out;
   const legacyVersion = Number(raw.version)||1;
-  if(typeof raw.storeName === 'string' && raw.storeName.trim()) out.storeName = raw.storeName.trim();
+  if(typeof raw.storeName === 'string' && raw.storeName.trim()) out.storeName = normalizeStoreName(raw.storeName);
   if(Number.isFinite(Number(raw.monthlyTarget)) && Number(raw.monthlyTarget)>0){
     out.monthlyTarget = Number(raw.monthlyTarget);
   }
@@ -698,7 +705,7 @@ function loadState(){
     if(raw){
       const parsed = JSON.parse(raw);
       const st = migrateState(parsed);
-      if((Number(parsed.version)||1) < 2){
+      if((Number(parsed.version)||1) < 2 || st.storeName !== parsed.storeName){
         try{ localStorage.setItem(LS_KEY, JSON.stringify(st)); }catch(e){}
       }
       return st;
@@ -2234,7 +2241,7 @@ document.addEventListener('input', e=>{
   if(t.dataset && t.dataset.set){
     const key = t.dataset.set;
     if(key==='storeName'){
-      S.storeName = t.value.trim() || '周大福 · 吕厝天虹店';
+      S.storeName = normalizeStoreName(t.value);
       $('#storeName').textContent = S.storeName;
       saveSoon();
     }else if(key==='staffName'){

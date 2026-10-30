@@ -1,6 +1,6 @@
 /* 周大福 · 店务 KPI — Service Worker
    更新页面时，把 CACHE 版本号一起改掉（例如 v1.0.1），保证手机拿到新文件。 */
-const CACHE = 'ctf-kpi-v1.1.0';
+const CACHE = 'ctf-kpi-v1.1.1';
 const ASSETS = [
   './',
   './index.html',
